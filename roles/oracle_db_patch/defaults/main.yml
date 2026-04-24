@@ -1,0 +1,40 @@
+# # Oracle base facts
+# oracle_user: oracle
+# oracle_group: dba
+
+
+# oracle_inventory: /dbusr/app/oraInventory
+
+# # Patch staging
+# patch_base_dir: /dbusr/patches
+# dbru_dir: "{{ patch_base_dir }}/DBRU"
+# ojvm_dir: "{{ patch_base_dir }}/OJVM"
+
+# # Backup locations
+# backup_dir: /dbxdining
+
+# # Safety switches
+# require_running_db: true
+# stop_listener: true
+# run_datapatch: true
+
+
+# User and group
+oracle_user: oracle
+oracle_group: dba
+
+oracle_home: /dbusr/app/oracle/193
+
+# Patch staging base
+patch_base_dir: /dbusr/patches
+
+# Patch directories on target
+dbru_dir: "{{ patch_base_dir }}/DBRU"
+ojvm_dir: "{{ patch_base_dir }}/OJVM"
+
+# Local (Ansible control node) patch source
+# Adjust this to where patches exist on your ansible server
+patch_source_dir: /software/RU_JAN_2026
+
+# Safety switches
+require_running_db: true

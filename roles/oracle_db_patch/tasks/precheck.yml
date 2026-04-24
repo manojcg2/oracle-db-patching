@@ -1,0 +1,74 @@
+# ----------- SOP 4.1-  CONFIRM ORACLE ENVIRONMENT ------------
+- name: Validate Oracle Home exists
+  stat:
+    path: "{{ oracle_home }}/bin/sqlplus"
+  register: oracle_home_check
+
+- name: Fail if Oracle Home is invalid 
+  fail:
+    msg: "Oracle home not found or invalid: {{ oracle_home }}"
+  when: not oracle_home_check.stat.exists
+
+- name: Dicover running Oracle SIDs via PMON
+  shell: "ps -ef | grep pmon | grep -v grep | awk '{print $NF}' | sed 's/ora_pmon_//g'"
+  register: running_sids
+  changed_when: false 
+
+- name: Set discovered SIDs as fact
+  set_fact:
+    discovered_sids: "{{ running_sids.stdout_lines }}"
+
+- name: Fail if no running SIDs found and require_running_db is true
+  fail:
+    msg: "No running Oracle SIDs found, but require_running_db is set to true."
+  when: 
+    - require_running_db 
+    - discovered_sids | length == 0
+
+# ------------ Confirm Oracle environment for each SID (CORE LOGIC) ------------
+- name: Confirm Oracle environment per SID
+  block:
+    - name: Display Oracle environment
+      debug:
+        msg: 
+          - "ORACLE_HOME: {{ oracle_home }}"
+          - "ORACLE_SID : {{ oracle_sid }}"
+
+    - name: Verify sqlplus version 
+      shell: "{{ oracle_home }}/bin/sqlplus -v"
+      register: sqlplus_version
+      changed_when: false
+      failed_when: sqlplus_version.rc != 0
+
+    - name: Display sqlplus version
+      debug:
+        msg: "{{ sqlplus_version.stdout }}"
+  
+  loop: "{{ discovered_sids }}"
+  loop_control:
+    loop_var: oracle_sid
+
+  # Set environment variables for each iteration
+  environment:
+    ORACLE_HOME: "{{ oracle_home }}"
+    ORACLE_SID: "{{ oracle_sid }}"
+  
+# ------------ Verify Oracle inventory pointer ------------
+- name: Verify oraInst.loc exists
+  stat: 
+    path: /etc/oraInst.loc
+  register: ora_inst_loc_check
+
+- name: Fail if oraInst.loc is missing
+  fail:
+    msg: "/etc/oraInst.loc not found. Oracle inventory pointer missing."
+  when: not ora_inst_loc_check.stat.exists
+
+- name: Display oraInst.loc content
+  shell: cat /etc/oraInst.loc
+  register: ora_inst_loc_content
+  changed_when: false
+
+- name: Show inventory pointer
+  debug:
+    msg: "{{ ora_inst_loc_content.stdout }}"

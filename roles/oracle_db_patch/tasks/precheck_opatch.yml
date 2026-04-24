@@ -1,0 +1,24 @@
+# ---------------- SOP 4.2 - VERIFY OPATCH VERSION ------------
+- name: Validate OPatch binary exists
+  stat:
+    path: "{{ oracle_home }}/OPatch/opatch"
+  register: opatch_binary
+
+- name: Fail if OPatch is missing
+  fail:
+    msg: "OPatch binary not found under {{ oracle_home }}/OPatch. Cannot proceed."
+  when: not opatch_binary.stat.exists
+
+- name: Capture OPatch version
+  shell: "{{ oracle_home }}/OPatch/opatch version"
+  register: opatch_version
+  changed_when: false
+  failed_when: opatch_version.rc != 0
+  environment:
+    ORACLE_HOME: "{{ oracle_home }}"
+
+- name: Display OPatch version
+  debug:
+    msg:
+      - "ORACLE_HOME : {{ oracle_home }}"
+      - "{{ opatch_version.stdout }}"

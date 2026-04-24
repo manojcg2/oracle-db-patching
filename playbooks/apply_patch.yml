@@ -1,0 +1,32 @@
+# ---
+# - name: Oracle DB patch orchestration
+#   hosts: dbservers
+#   become: yes
+#   become_user: oracle
+#   gather_facts: yes
+
+#   vars:
+#     # Safety valve – can be overridden from CLI if ever needed
+#     allow_destructive_actions: false
+
+#   pre_tasks:
+#     - name: Display execution mode
+#       debug:
+#         msg:
+#           - "Check mode: {{ ansible_check_mode }}"
+#           - "Destructive allowed: {{ allow_destructive_actions }}"
+#           - "Oracle Home: {{ oracle_home }}"
+#         tags: [always]
+  
+#   roles:
+#     -role: oracle_db_patch
+
+---
+- name: Oracle DB patch orchestration
+  hosts: dbservers
+  become: yes
+  become_user: oracle
+  gather_facts: false 
+  
+  roles:
+    -role: oracle_db_patch

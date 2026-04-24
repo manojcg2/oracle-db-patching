@@ -1,0 +1,12 @@
+---
+# SOP 3 – Transfer Patches
+- import_tasks: transfer_patches.yml
+
+# SOP 4.1 – Confirm Oracle Environment
+# - import_tasks: precheck.yml
+
+# SOP 4.2 – OPatch
+# - import_tasks: precheck_opatch.yml
+
+# SOP 4.3 – Filesystem
+# - import_tasks: precheck_filesystem.yml

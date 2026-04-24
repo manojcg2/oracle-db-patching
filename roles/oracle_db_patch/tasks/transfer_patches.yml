@@ -1,0 +1,56 @@
+---
+- name: Ensure patch base directory exists
+  file:
+    path: "{{ patch_base_dir }}"
+    state: directory
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+    mode: '0755'
+
+- name: Ensure DBRU directory exists
+  file:
+    path: "{{ dbru_dir }}"
+    state: directory
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+    mode: '0755'
+
+- name: Ensure OJVM directory exists
+  file:
+    path: "{{ ojvm_dir }}"
+    state: directory
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+    mode: '0755'
+
+# -------- DBRU PATCH TRANSFER --------
+- name: Copy DBRU patch files
+  copy:
+    src: "{{ patch_source_dir }}/DBRU/"
+    dest: "{{ dbru_dir }}/"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+    mode: '0644'
+  register: dbru_copy
+
+- name: Verify DBRU patch copy
+  debug:
+    msg:
+      - "DBRU files copied:"
+      - "{{ dbru_copy.files | default([]) }}"
+
+# -------- OJVM PATCH TRANSFER --------
+- name: Copy OJVM patch files
+  copy:
+    src: "{{ patch_source_dir }}/OJVM/"
+    dest: "{{ ojvm_dir }}/"
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+    mode: '0644'
+  register: ojvm_copy
+
+- name: Verify OJVM patch copy
+  debug:
+    msg:
+      - "OJVM files copied:"
+      - "{{ ojvm_copy.files | default([]) }}"

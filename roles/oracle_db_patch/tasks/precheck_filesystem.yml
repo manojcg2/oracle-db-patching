@@ -1,0 +1,32 @@
+# ------------------ SOP 4.3 - CHECK /dbusr , /tmp MOUNT POINTS AND SPACE ------------
+- name: Capture filesystem usage for /dbusr and /tmp
+  shell: df -P {{ item }} | tail -1
+  register: fs_usage
+  changed_when: false
+  loop:
+    - /dbusr
+    - /tmp
+
+- name: Parse filesystem utilization
+  set_fact:
+    filesystem_usage: >-
+      {{
+        filesystem_usage | default([]) + [
+          {
+            'mount': item.item,
+            'used_percent': (item.stdout.split()[4] | replace('%','') | int)
+          }
+        ]
+      }}
+  loop: "{{ fs_usage.results }}"
+
+- name: Show filesystem utilization
+  debug:
+    msg: 
+      "Mount {{ item.mount }} usage is {{ item.used_percent }}%"
+  loop: "{{ filesystem_usage }}"
+
+- name: Fail if filesystem utilization exceeds 60%
+  fail:
+    msg: "Filesystem {{ item.mount }} usage is {{ item.used_percent }}%, which exceeds SOP threshold (60%)."
+  loop: "{{ filesystem_usage }}"
